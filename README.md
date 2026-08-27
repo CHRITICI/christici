@@ -1,62 +1,60 @@
 # Christici
 
-## Project Overview
-- **Name**: Christici
-- **Goal**: Plateforme multimédia moderne réunissant vidéos, musique, images et articles — destinée à être publiée sur **christici.com**.
-- **Features**: Page d'accueil responsive, navigation claire, sections multimédia alimentées par API, base de données D1.
+> Le 1er site 100% chrétien au Togo — *Jusqu'au bout du monde !*
 
-## URLs
-- **Production**: pas encore déployé (cible : https://christici.com)
-- **API (local)**: http://localhost:3000/api/media, /api/media/home, /api/media/:slug, /api/health
+## Project Overview
+- **Name**: Christici — https://christici.com
+- **Goal**: Révéler l'environnement chrétien au monde : répertorier les Églises, organisations, profils et services chrétiens sur une seule plateforme (annuaire + médias + infos), en démarrant par le Togo, conçue pour s'étendre à d'autres pays.
+- **Stack**: Hono + TypeScript + Cloudflare Pages + D1 (SQLite) + TailwindCSS (CDN)
 
 ## Fonctionnalités terminées
-- ✅ Page d'accueil responsive (mobile → desktop) : hero, présentation, 4 sections multimédia, à propos, footer
-- ✅ Navigation fixe avec menu mobile (hamburger)
-- ✅ API REST Hono : liste par type, agrégat page d'accueil, détail par slug
-- ✅ Base de données Cloudflare D1 (SQLite) avec migrations et données d'exemple génériques
-- ✅ Cartes média dynamiques (miniature, badge type, mise en avant, métadonnées)
+- ✅ **Accueil** : hero, recherche rapide, statistiques, catégories, églises/organisations/profils mis en avant, événements, nouvelles, médias, CTA inscription
+- ✅ **Trouver une église** : filtres région / ville / confession / mot-clé + **géolocalisation** (« autour de ma position », non bloquante si refusée) + pagination
+- ✅ **Organisations chrétiennes** : associations, bibliothèques, instituts bibliques, centres & camps de prière, formations musicales (15 catégories)
+- ✅ **Profils chrétiens** : musiciens, sociologues, groupes musicaux (architecture extensible)
+- ✅ **Affaires chrétiennes** : microfinances, hôpitaux, bars sans alcool, restaurants, librairies, studios
+- ✅ **Infos** : événements, nouvelles, offres d'emploi, publications
+- ✅ **Médias** : vidéos, musique, images, articles (onglets)
+- ✅ **Recherche globale** sur toutes les entités
+- ✅ **Inscription** : formulaire public de demande (table `submissions`, modération prévue)
+- ✅ **SEO** : title/meta par page, Open Graph, favicon logo officiel, canonical, robots.txt, sitemap.xml, page 404
+- ✅ **Identité visuelle** : logo Christici officiel, charte bleu/orange inspirée des documents historiques
 
-## Fonctionnalités non encore implémentées
-- ⬜ Pages de détail pour chaque contenu (lecture vidéo/audio, article complet, galerie)
-- ⬜ Interface d'administration pour publier/modifier des contenus
-- ⬜ Upload de fichiers média (R2)
-- ⬜ Recherche et filtrage par tags
-- ⬜ Déploiement en production + domaine christici.com
-
-## Prochaines étapes recommandées
-1. Créer la base D1 de production (`npx wrangler d1 create christici-production`) et renseigner `database_id` dans `wrangler.jsonc`
-2. Déployer sur Cloudflare Pages puis lier le domaine **christici.com**
-3. Ajouter les pages de détail (`/media/:slug`)
-4. Mettre en place un espace d'administration protégé
+## URLs (API)
+- `GET /api/home` — agrégat page d'accueil (+ stats)
+- `GET /api/churches` — filtres : `country, region, city, district, denomination, q, near=lat,lng, radius, page, limit`
+- `GET /api/churches/filters` · `GET /api/churches/:slug`
+- `GET /api/directory?grp=organisation|affaire&category=&city=&q=` · `/categories` · `/:slug`
+- `GET /api/profiles?category=&city=&available=1&q=` · `/:slug`
+- `GET /api/infos/events|news|jobs|publications` (+ `/events/:slug`, `/news/:slug`)
+- `GET /api/search?q=` — recherche globale
+- `POST /api/submissions` — demande d'inscription `{kind, name, contact, category?, city?, message?}`
+- `GET /api/health`
 
 ## Data Architecture
-- **Data Models**: table unique `media_items` (type polymorphe : `video` | `music` | `image` | `article`) — titre, slug, description, thumbnail_url, media_url, body (articles), metadata (JSON : durée, genre, tags…), featured, published
-- **Storage Services**: Cloudflare D1 (SQLite distribué) ; R2 prévu pour les fichiers média
-- **Data Flow**: Frontend (axios) → API Hono (`/api/media/*`) → D1 → rendu dynamique des cartes
+- **Tables D1** : `media_items` (vidéos/musique/images/articles), `categories` (15 catégories, 3 groupes), `churches` (géolocalisées, multi-pays), `directory_entries` (organisations & affaires), `profiles`, `events`, `news`, `jobs`, `publications`, `submissions`
+- **Index** : région, ville, quartier, confession, pays, catégorie, dates, featured/published
+- **Géolocalisation** : pré-filtre SQL (bounding box) + distance Haversine exacte en JS (D1 n'autorise pas les fonctions math SQL)
+- **Données** : entrées de **démonstration** clairement marquées « (démo) » — aucune institution réelle
 
-## Structure du projet
-```
-webapp/
-├── src/
-│   ├── index.tsx        # Entrée Hono + page d'accueil JSX
-│   ├── renderer.tsx     # Layout HTML global
-│   ├── types.ts         # Types TypeScript partagés
-│   └── routes/media.ts  # Routes API /api/media
-├── public/static/       # app.js + style.css (servis en /static/*)
-├── migrations/          # Migrations D1
-├── seed.sql             # Données d'exemple (génériques)
-├── ecosystem.config.cjs # Config PM2 (dev sandbox)
-└── wrangler.jsonc       # Config Cloudflare (binding D1)
-```
+## Non implémenté (prochaines étapes)
+- ⬜ Pages fiches détaillées (`/eglises/:slug`, fiche organisation/profil) avec carte
+- ⬜ Back-office d'administration sécurisé (validation des inscriptions, CRUD contenus)
+- ⬜ Comptes utilisateurs & modification de fiche par le propriétaire
+- ⬜ Carte interactive (Leaflet) et upload de fichiers (R2)
+- ⬜ Tailwind en build local (remplacer le CDN avant montée en charge)
+- ⬜ Déploiement production + domaine christici.com
 
-## User Guide
-- **Dev local (sandbox)** : `npm run build` puis `pm2 start ecosystem.config.cjs`
-- **Base locale** : `npm run db:migrate:local` puis `npm run db:seed`
-- **Tester** : `curl http://localhost:3000/api/health`
+## Dev local (sandbox)
+```bash
+npm run build
+npx wrangler d1 migrations apply christici-production --local
+npx wrangler d1 execute christici-production --local --file=./seed.sql
+npx wrangler d1 execute christici-production --local --file=./seed_directory.sql
+pm2 start ecosystem.config.cjs   # wrangler pages dev dist --d1 --local :3000
+```
 
 ## Deployment
-- **Platform**: Cloudflare Pages (Hono + TypeScript + TailwindCSS via CDN)
-- **Status**: ❌ Pas encore déployé — prêt pour une première mise en ligne
-- **Domaine cible**: christici.com (à configurer dans Cloudflare Pages → Custom domains)
-- **Secrets**: aucun — aucune clé ni donnée personnelle dans le dépôt
+- **Platform**: Cloudflare Pages · **Status**: ❌ Pas encore déployé (en attente du choix du chemin : hébergement Genspark ou compte Cloudflare propre)
+- **Domaine cible**: christici.com · **Secrets**: aucun dans le dépôt
 - **Last Updated**: 2026-08-27

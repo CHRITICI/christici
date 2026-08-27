@@ -1,9 +1,24 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
-import { renderer } from './renderer'
+import { renderer, type LayoutProps } from './renderer'
 import media from './routes/media'
+import churches from './routes/churches'
+import directory from './routes/directory'
+import profiles from './routes/profiles'
+import infos from './routes/infos'
+import search from './routes/search'
+import submissions from './routes/submissions'
+import home from './routes/home'
 import type { Bindings } from './types'
+import { HomePage } from './pages/home'
+import { EglisesPage } from './pages/eglises'
+import { DirectoryPage } from './pages/directory'
+import { InfosPage } from './pages/infos'
+import { MediasPage } from './pages/medias'
+import { AboutPage } from './pages/about'
+import { InscriptionPage } from './pages/inscription'
+import { SearchPage } from './pages/search'
 
 const app = new Hono<{ Bindings: Bindings }>()
 
@@ -13,206 +28,164 @@ app.use('/api/*', cors())
 // Fichiers statiques (public/static/* → /static/*)
 app.use('/static/*', serveStatic({ root: './public' }))
 
-// Routes API
+// ===== Routes API =====
+app.route('/api/home', home)
 app.route('/api/media', media)
-
+app.route('/api/churches', churches)
+app.route('/api/directory', directory)
+app.route('/api/profiles', profiles)
+app.route('/api/infos', infos)
+app.route('/api/search', search)
+app.route('/api/submissions', submissions)
 app.get('/api/health', (c) => c.json({ status: 'ok', service: 'christici' }))
 
-// Renderer JSX pour les pages HTML
+// SEO : robots.txt + sitemap.xml
+app.get('/robots.txt', (c) => {
+  return c.text(
+    `User-agent: *\nAllow: /\nSitemap: https://christici.com/sitemap.xml\n`,
+    200,
+    { 'Content-Type': 'text/plain' }
+  )
+})
+
+app.get('/sitemap.xml', async (c) => {
+  const base = 'https://christici.com'
+  const staticPages = ['/', '/eglises', '/organisations', '/profils', '/affaires', '/infos', '/medias', '/a-propos', '/inscription', '/recherche']
+  const urls = staticPages
+    .map((p) => `  <url><loc>${base}${p}</loc><changefreq>weekly</changefreq></url>`)
+    .join('\n')
+  return c.text(
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`,
+    200,
+    { 'Content-Type': 'application/xml' }
+  )
+})
+
+// ===== Pages HTML (renderer JSX) =====
 app.use(renderer)
 
-// Page d'accueil
+function withLayout(c: { set: (k: string, v: unknown) => void }, props: LayoutProps) {
+  c.set('layoutProps', props)
+}
+
 app.get('/', (c) => {
+  withLayout(c, { title: undefined, currentPath: '/' })
+  return c.render(<HomePage />)
+})
+
+app.get('/eglises', (c) => {
+  withLayout(c, {
+    title: 'Trouver une église',
+    description: 'Trouvez une église au Togo par région, ville, quartier ou confession, ou autour de votre position.',
+    currentPath: '/eglises',
+  })
+  return c.render(<EglisesPage />)
+})
+
+app.get('/organisations', (c) => {
+  withLayout(c, {
+    title: 'Organisations chrétiennes',
+    description: 'Associations chrétiennes, bibliothèques, instituts bibliques, centres de prière, camps de prière et centres de formation musicale.',
+    currentPath: '/organisations',
+  })
   return c.render(
-    <>
-      {/* ===== Navigation ===== */}
-      <header id="site-header" class="fixed top-0 inset-x-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/60">
-        <nav class="max-w-6xl mx-auto flex items-center justify-between px-5 py-4" aria-label="Navigation principale">
-          <a href="/" class="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 to-violet-400 bg-clip-text text-transparent">
-            Christici
-          </a>
-          <button id="nav-toggle" class="md:hidden text-slate-300 hover:text-white text-xl" aria-label="Ouvrir le menu" aria-expanded="false">
-            <i class="fas fa-bars"></i>
-          </button>
-          <ul id="nav-menu" class="hidden md:flex flex-col md:flex-row absolute md:static top-full left-0 right-0 bg-slate-950 md:bg-transparent border-b md:border-0 border-slate-800 gap-1 md:gap-7 px-5 py-4 md:p-0 text-sm font-medium text-slate-300">
-            <li><a href="#videos" class="nav-link">Vidéos</a></li>
-            <li><a href="#musique" class="nav-link">Musique</a></li>
-            <li><a href="#images" class="nav-link">Images</a></li>
-            <li><a href="#articles" class="nav-link">Articles</a></li>
-            <li><a href="#a-propos" class="nav-link">À propos</a></li>
-          </ul>
-        </nav>
-      </header>
+    <DirectoryPage
+      grp="organisation"
+      title="Organisations chrétiennes"
+      subtitle="Associations chrétiennes, bibliothèques et librairies, instituts et centres de formation biblique et théologique, centres de prière, camps de prière, centres de formation musicale."
+      icon="fa-people-group"
+    />
+  )
+})
 
-      <main>
-        {/* ===== Hero ===== */}
-        <section id="hero-section" class="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
-          <div class="hero-glow" aria-hidden="true"></div>
-          <div class="relative z-10 max-w-3xl mx-auto text-center px-5 pt-24 pb-16">
-            <p class="text-teal-400 font-semibold tracking-widest uppercase text-sm mb-4">
-              Plateforme multimédia
-            </p>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-              Bienvenue sur{' '}
-              <span class="bg-gradient-to-r from-teal-400 via-cyan-300 to-violet-400 bg-clip-text text-transparent">
-                Christici
-              </span>
-            </h1>
-            <p class="text-lg md:text-xl text-slate-400 leading-relaxed mb-10">
-              Un espace unique pour découvrir et partager des vidéos, de la musique,
-              des images et des articles. Un contenu vivant, une expérience soignée.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="#videos" class="btn-primary">
-                <i class="fas fa-play mr-2"></i>Explorer les contenus
-              </a>
-              <a href="#a-propos" class="btn-secondary">
-                En savoir plus
-              </a>
-            </div>
-          </div>
-          <a href="#presentation" class="absolute bottom-8 text-slate-500 hover:text-teal-400 transition-colors animate-bounce" aria-label="Défiler vers le bas">
-            <i class="fas fa-chevron-down text-xl"></i>
-          </a>
-        </section>
+app.get('/profils', (c) => {
+  withLayout(c, {
+    title: 'Profils chrétiens',
+    description: 'Vous cherchez un musicien chrétien, un sociologue chrétien ou un groupe musical gospel ? Trouvez le bon profil sur Christici.',
+    currentPath: '/profils',
+  })
+  return c.render(
+    <DirectoryPage
+      grp="profil"
+      title="Profils chrétiens"
+      subtitle="Musiciens chrétiens, sociologues chrétiens, groupes musicaux gospel… Trouvez le bon profil pour votre besoin."
+      icon="fa-user-check"
+    />
+  )
+})
 
-        {/* ===== Présentation ===== */}
-        <section id="presentation" class="max-w-6xl mx-auto px-5 py-20">
-          <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 class="section-title">Qu'est-ce que Christici&nbsp;?</h2>
-              <p class="text-slate-400 leading-relaxed mb-4">
-                Christici est une plateforme multimédia moderne qui rassemble quatre
-                formes de création : la vidéo, la musique, l'image et l'écrit.
-              </p>
-              <p class="text-slate-400 leading-relaxed mb-6">
-                Conçue pour être rapide, élégante et accessible sur tous les écrans,
-                elle évoluera au fil du temps avec de nouveaux contenus et de
-                nouvelles fonctionnalités.
-              </p>
-              <ul class="space-y-3 text-slate-300">
-                <li class="flex items-start gap-3">
-                  <i class="fas fa-bolt text-teal-400 mt-1"></i>
-                  <span>Rapide et accessible partout dans le monde</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <i class="fas fa-layer-group text-teal-400 mt-1"></i>
-                  <span>Architecture évolutive : frontend, API et base de données</span>
-                </li>
-                <li class="flex items-start gap-3">
-                  <i class="fas fa-mobile-screen text-teal-400 mt-1"></i>
-                  <span>Design responsive, du mobile au grand écran</span>
-                </li>
-              </ul>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="pillar-card">
-                <i class="fas fa-video text-3xl text-teal-400 mb-3"></i>
-                <h3 class="font-semibold">Vidéos</h3>
-                <p class="text-sm text-slate-400">Films, extraits et créations en mouvement</p>
-              </div>
-              <div class="pillar-card">
-                <i class="fas fa-music text-3xl text-violet-400 mb-3"></i>
-                <h3 class="font-semibold">Musique</h3>
-                <p class="text-sm text-slate-400">Compositions et univers sonores</p>
-              </div>
-              <div class="pillar-card">
-                <i class="fas fa-image text-3xl text-cyan-400 mb-3"></i>
-                <h3 class="font-semibold">Images</h3>
-                <p class="text-sm text-slate-400">Photographies et séries visuelles</p>
-              </div>
-              <div class="pillar-card">
-                <i class="fas fa-pen-nib text-3xl text-amber-400 mb-3"></i>
-                <h3 class="font-semibold">Articles</h3>
-                <p class="text-sm text-slate-400">Textes, réflexions et coulisses</p>
-              </div>
-            </div>
-          </div>
-        </section>
+app.get('/affaires', (c) => {
+  withLayout(c, {
+    title: 'Affaires chrétiennes',
+    description: 'Microfinances chrétiennes, hôpitaux, bars sans alcool, restaurants à restrictions chrétiennes, librairies et studios chrétiens.',
+    currentPath: '/affaires',
+  })
+  return c.render(
+    <DirectoryPage
+      grp="affaire"
+      title="Affaires chrétiennes"
+      subtitle="Microfinances chrétiennes, hôpitaux et cliniques, bars sans alcool, restaurants à restrictions chrétiennes, librairies et studios chrétiens."
+      icon="fa-briefcase"
+    />
+  )
+})
 
-        {/* ===== Sections multimédia (remplies dynamiquement via l'API) ===== */}
-        <section id="videos" class="media-section">
-          <div class="max-w-6xl mx-auto px-5">
-            <div class="section-header">
-              <h2 class="section-title"><i class="fas fa-video mr-3 text-teal-400"></i>Vidéos</h2>
-              <p class="text-slate-500">Les dernières créations vidéo</p>
-            </div>
-            <div id="videos-grid" class="media-grid" data-type="video">
-              <div class="media-loading"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
-            </div>
-          </div>
-        </section>
+app.get('/infos', (c) => {
+  withLayout(c, {
+    title: 'Infos — Événements, nouvelles, emplois, publications',
+    description: "Événements chrétiens, nouvelles, offres d'emploi et nouvelles publications (ouvrages) en ligne.",
+    currentPath: '/infos',
+  })
+  return c.render(<InfosPage />)
+})
 
-        <section id="musique" class="media-section media-section-alt">
-          <div class="max-w-6xl mx-auto px-5">
-            <div class="section-header">
-              <h2 class="section-title"><i class="fas fa-music mr-3 text-violet-400"></i>Musique</h2>
-              <p class="text-slate-500">Titres et compositions</p>
-            </div>
-            <div id="musique-grid" class="media-grid" data-type="music">
-              <div class="media-loading"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
-            </div>
-          </div>
-        </section>
+app.get('/medias', (c) => {
+  withLayout(c, {
+    title: 'Médias — Vidéos, musique, images, articles',
+    description: 'Vidéos, musique gospel, images et articles : les contenus multimédias de Christici.',
+    currentPath: '/medias',
+  })
+  return c.render(<MediasPage />)
+})
 
-        <section id="images" class="media-section">
-          <div class="max-w-6xl mx-auto px-5">
-            <div class="section-header">
-              <h2 class="section-title"><i class="fas fa-image mr-3 text-cyan-400"></i>Images</h2>
-              <p class="text-slate-500">Séries photographiques et visuels</p>
-            </div>
-            <div id="images-grid" class="media-grid" data-type="image">
-              <div class="media-loading"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
-            </div>
-          </div>
-        </section>
+app.get('/a-propos', (c) => {
+  withLayout(c, {
+    title: 'Qui sommes-nous',
+    description: "Christici : la plateforme qui révèle l'environnement chrétien au monde. Mission, vision et comment s'inscrire.",
+    currentPath: '/a-propos',
+  })
+  return c.render(<AboutPage />)
+})
 
-        <section id="articles" class="media-section media-section-alt">
-          <div class="max-w-6xl mx-auto px-5">
-            <div class="section-header">
-              <h2 class="section-title"><i class="fas fa-pen-nib mr-3 text-amber-400"></i>Articles</h2>
-              <p class="text-slate-500">Textes et réflexions</p>
-            </div>
-            <div id="articles-grid" class="media-grid" data-type="article">
-              <div class="media-loading"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
-            </div>
-          </div>
-        </section>
+app.get('/inscription', (c) => {
+  withLayout(c, {
+    title: 'Comment s\u2019inscrire',
+    description: "Inscrivez votre église, organisation, profil ou affaire chrétienne à l'annuaire Christici.",
+    currentPath: '/inscription',
+  })
+  return c.render(<InscriptionPage />)
+})
 
-        {/* ===== À propos / contact ===== */}
-        <section id="a-propos" class="max-w-3xl mx-auto px-5 py-24 text-center">
-          <h2 class="section-title mb-6">À propos</h2>
-          <p class="text-slate-400 leading-relaxed mb-8">
-            Christici est en construction. Cette première version pose les bases
-            d'une plateforme qui grandira avec ses contenus et ses visiteurs.
-            Revenez régulièrement pour découvrir les nouveautés.
-          </p>
-          <div class="inline-flex items-center gap-2 text-sm text-slate-500 border border-slate-800 rounded-full px-5 py-2">
-            <i class="fas fa-globe text-teal-400"></i>
-            Bientôt disponible sur <span class="text-slate-300 font-medium">christici.com</span>
-          </div>
-        </section>
-      </main>
+app.get('/recherche', (c) => {
+  withLayout(c, {
+    title: 'Recherche',
+    description: 'Recherchez parmi les églises, organisations, profils, événements, nouvelles et médias de Christici.',
+    currentPath: '/recherche',
+  })
+  return c.render(<SearchPage />)
+})
 
-      {/* ===== Pied de page ===== */}
-      <footer class="border-t border-slate-800/60 py-10">
-        <div class="max-w-6xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-          <p>
-            <span class="font-bold bg-gradient-to-r from-teal-400 to-violet-400 bg-clip-text text-transparent">Christici</span>
-            {' '}© {new Date().getFullYear()} — Tous droits réservés
-          </p>
-          <ul class="flex gap-6">
-            <li><a href="#videos" class="hover:text-teal-400 transition-colors">Vidéos</a></li>
-            <li><a href="#musique" class="hover:text-teal-400 transition-colors">Musique</a></li>
-            <li><a href="#images" class="hover:text-teal-400 transition-colors">Images</a></li>
-            <li><a href="#articles" class="hover:text-teal-400 transition-colors">Articles</a></li>
-          </ul>
-        </div>
-      </footer>
-
-      <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-      <script src="/static/app.js"></script>
-    </>
+// 404
+app.notFound((c) => {
+  withLayout(c, { title: 'Page introuvable', currentPath: '/404' })
+  c.status(404)
+  return c.render(
+    <section class="max-w-2xl mx-auto px-4 sm:px-6 py-24 text-center">
+      <i class="fas fa-compass text-5xl text-blue-200 mb-6"></i>
+      <h1 class="font-display text-4xl font-extrabold mb-4">Page introuvable</h1>
+      <p class="text-slate-500 mb-8">La page que vous cherchez n'existe pas ou a été déplacée.</p>
+      <a href="/" class="btn-primary-sm"><i class="fas fa-house mr-2"></i>Retour à l'accueil</a>
+    </section>
   )
 })
 
