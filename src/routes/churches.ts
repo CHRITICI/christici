@@ -83,6 +83,10 @@ churches.get('/', async (c) => {
   if (q.city) { where += ' AND city = ?'; params.push(q.city) }
   if (q.district) { where += ' AND district = ?'; params.push(q.district) }
   if (q.denomination) { where += ' AND denomination = ?'; params.push(q.denomination) }
+  // Filtre par statut de vérification (a_verifier | verifiee | signalee)
+  if (q.status && ['a_verifier', 'verifiee', 'signalee'].includes(q.status)) {
+    where += ' AND status = ?'; params.push(q.status)
+  }
   if (q.q) {
     where += ' AND (name LIKE ? OR description LIKE ? OR district LIKE ?)'
     const like = `%${q.q.slice(0, 100)}%`

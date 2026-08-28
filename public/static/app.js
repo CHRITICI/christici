@@ -54,6 +54,16 @@ window.Christici = {
     return `<div class="error-state"><i class="fas fa-triangle-exclamation text-2xl mb-2"></i><p>${text || 'Une erreur est survenue. Réessayez dans un instant.'}</p></div>`;
   },
 
+  // --- Badges de statut de vérification (données réelles) ---
+  statusBadge(status) {
+    const map = {
+      verifiee: '<span class="tag tag-green" title="Fiche vérifiée par l\u2019équipe Christici ou son responsable"><i class="fas fa-circle-check mr-1"></i>Vérifiée</span>',
+      a_verifier: '<span class="tag tag-slate" title="Fiche importée depuis une source publique, en attente de vérification"><i class="fas fa-hourglass-half mr-1"></i>À vérifier</span>',
+      signalee: '<span class="tag tag-red" title="Cette fiche a fait l\u2019objet d\u2019un signalement"><i class="fas fa-flag mr-1"></i>Signalée</span>',
+    };
+    return map[status] || map.a_verifier;
+  },
+
   // --- Cartes ---
   churchCard(ch) {
     const e = this.escapeHtml;
@@ -64,8 +74,9 @@ window.Christici = {
         <div class="flex items-start gap-3">
           <div class="entry-icon"><i class="fas fa-church"></i></div>
           <div class="min-w-0">
-            <h3>${e(ch.name)}</h3>
+            <h3><a href="/eglises/${e(ch.slug)}" class="hover:text-blue-700">${e(ch.name)}</a></h3>
             <div class="entry-tags mt-1.5">
+              ${this.statusBadge(ch.status)}
               ${ch.denomination ? `<span class="tag tag-blue">${e(ch.denomination)}</span>` : ''}
               ${ch.featured ? '<span class="tag tag-amber"><i class="fas fa-star mr-1"></i>À la une</span>' : ''}
               ${distance}
@@ -77,7 +88,10 @@ window.Christici = {
           ${location ? `<span><i class="fas fa-location-dot"></i>${location}</span>` : ''}
           ${ch.service_times ? `<span><i class="fas fa-clock"></i>${e(ch.service_times)}</span>` : ''}
         </div>
-        ${ch.website ? `<div class="entry-actions"><a href="${e(ch.website)}" target="_blank" rel="noopener noreferrer"><i class="fas fa-arrow-up-right-from-square mr-1"></i>Visiter le site</a></div>` : ''}
+        <div class="entry-actions">
+          <a href="/eglises/${e(ch.slug)}"><i class="fas fa-circle-info mr-1"></i>Voir la fiche</a>
+          ${ch.website ? `<a href="${e(ch.website)}" target="_blank" rel="noopener noreferrer"><i class="fas fa-arrow-up-right-from-square mr-1"></i>Site web</a>` : ''}
+        </div>
       </article>`;
   },
 

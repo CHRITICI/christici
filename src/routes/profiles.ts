@@ -19,6 +19,9 @@ profiles.get('/', async (c) => {
   if (q.category) { where += ' AND cat.slug = ?'; params.push(q.category) }
   if (q.city) { where += ' AND p.city = ?'; params.push(q.city) }
   if (q.available === '1') { where += ' AND p.available = 1' }
+  if (q.status && ['a_verifier', 'verifiee', 'signalee'].includes(q.status)) {
+    where += ' AND p.status = ?'; params.push(q.status)
+  }
   if (q.q) {
     where += ' AND (p.full_name LIKE ? OR p.title LIKE ? OR p.bio LIKE ? OR p.skills LIKE ?)'
     const like = `%${q.q.slice(0, 100)}%`

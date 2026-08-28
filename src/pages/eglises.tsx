@@ -32,6 +32,15 @@ export function EglisesPage() {
               <select id="filter-denomination" class="filter-input"><option value="">Toutes les confessions</option></select>
             </div>
             <div>
+              <label for="filter-status" class="filter-label">Vérification</label>
+              <select id="filter-status" class="filter-input">
+                <option value="">Tous les statuts</option>
+                <option value="verifiee">Vérifiées</option>
+                <option value="a_verifier">À vérifier</option>
+                <option value="signalee">Signalées</option>
+              </select>
+            </div>
+            <div class="sm:col-span-2 lg:col-span-2">
               <label for="filter-q" class="filter-label">Mot-clé / quartier</label>
               <input id="filter-q" type="search" class="filter-input" placeholder="Nom, quartier…" />
             </div>
@@ -44,28 +53,41 @@ export function EglisesPage() {
           <p id="geo-status" class="text-sm text-slate-500 mt-3 hidden" role="status"></p>
         </div>
 
-        {/* Résultats */}
-        <div class="flex items-center justify-between mt-8 mb-5">
+        {/* Résultats : liste + carte */}
+        <div class="flex items-center justify-between mt-8 mb-5 flex-wrap gap-3">
           <p id="results-count" class="text-sm text-slate-500"></p>
+          <div class="flex gap-2">
+            <button id="view-list" class="admin-tab active"><i class="fas fa-list mr-1"></i>Liste</button>
+            <button id="view-map" class="admin-tab"><i class="fas fa-map-location-dot mr-1"></i>Carte</button>
+          </div>
         </div>
         <div id="churches-grid" class="grid-cards">
           <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement des églises…</div>
         </div>
+        <div id="churches-map" class="hidden rounded-xl overflow-hidden border border-slate-200" style={{ height: '480px' }}></div>
         <div id="pagination" class="flex justify-center gap-2 mt-10"></div>
       </section>
 
-      {/* Info démo */}
+      {/* Transparence des données */}
       <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl px-5 py-4 text-sm text-amber-800 flex gap-3">
-          <i class="fas fa-circle-info mt-0.5"></i>
+        <div class="bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 text-sm text-blue-900 flex gap-3">
+          <i class="fas fa-shield-halved mt-0.5"></i>
           <p>
-            L'annuaire démarre au Togo et s'enrichit progressivement. Les entrées marquées
-            «&nbsp;démo&nbsp;» sont des exemples de présentation.
-            <a href="/inscription" class="font-semibold underline underline-offset-2 ml-1">Inscrivez votre église</a>
-            pour apparaître dans l'annuaire.
+            Christici n'affiche que des fiches d'églises réelles, issues de sources publiques vérifiables
+            (ex. OpenStreetMap, licence ODbL) ou enregistrées par leurs responsables. Chaque fiche indique
+            sa source et son statut de vérification. Vous pouvez{' '}
+            <a href="/inscription" class="font-semibold underline underline-offset-2">inscrire votre église</a>,
+            revendiquer une fiche existante ou signaler une erreur depuis chaque fiche.
+            Données cartographiques ©{' '}
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="underline">
+              OpenStreetMap contributors
+            </a>.
           </p>
         </div>
       </section>
+
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+      <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 
       <script defer src="/static/pages/eglises.js"></script>
     </>

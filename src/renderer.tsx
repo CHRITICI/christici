@@ -90,6 +90,9 @@ export const renderer = jsxRenderer(
                 <a href="/recherche" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-blue-700 transition-colors" aria-label="Rechercher">
                   <i class="fas fa-search"></i>
                 </a>
+                <a href="/compte" class="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-blue-700 transition-colors" aria-label="Mon compte">
+                  <i class="fas fa-user-circle"></i>
+                </a>
                 <a href="/inscription" class="hidden sm:inline-flex btn-cta text-sm px-4 py-2">
                   <i class="fas fa-user-plus mr-2"></i>S'inscrire
                 </a>
@@ -111,8 +114,11 @@ export const renderer = jsxRenderer(
                     </a>
                   </li>
                 ))}
-                <li class="pt-2">
-                  <a href="/inscription" class="btn-cta w-full justify-center text-sm">
+                <li class="pt-2 flex gap-2">
+                  <a href="/compte" class="btn-ghost-sm flex-1 justify-center text-sm">
+                    <i class="fas fa-user-circle mr-2"></i>Mon compte
+                  </a>
+                  <a href="/inscription" class="btn-cta flex-1 justify-center text-sm">
                     <i class="fas fa-user-plus mr-2"></i>S'inscrire
                   </a>
                 </li>

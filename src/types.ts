@@ -171,6 +171,55 @@ export interface PublicationItem {
   created_at: string
 }
 
+// ===== Statuts de vérification des fiches (données réelles) =====
+export type EntityStatus = 'a_verifier' | 'verifiee' | 'signalee'
+
+export interface User {
+  id: number
+  email: string
+  name: string
+  role: 'user' | 'admin'
+  created_at: string
+}
+
+export interface Report {
+  id: number
+  entity_type: string
+  entity_id: number | null
+  reason: string
+  details: string | null
+  reporter_email: string | null
+  user_id: number | null
+  status: 'pending' | 'resolved' | 'rejected'
+  created_at: string
+}
+
+export interface Claim {
+  id: number
+  entity_type: string
+  entity_id: number
+  user_id: number | null
+  contact_name: string
+  contact_email: string
+  contact_phone: string | null
+  role_in_entity: string | null
+  message: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+}
+
+export interface Country {
+  code: string
+  name: string
+  enabled: number
+  priority: number
+}
+
 export type Bindings = {
   DB: D1Database
+}
+
+// Variables injectées par les middlewares (utilisateur courant)
+export type AppVariables = {
+  user: User | null
 }

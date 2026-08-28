@@ -246,3 +246,35 @@ body {
 .page-btn:hover { border-color: #93c5fd; color: #1d4ed8; }
 .page-btn.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
 .page-btn[disabled] { opacity: .45; pointer-events: none; }
+
+/* ---------- Badges de statut de vérification (données réelles) ---------- */
+.tag-red { background: #fef2f2; color: #b91c1c; }
+.tag-slate { background: #f1f5f9; color: #475569; }
+
+/* ---------- Fiche détaillée ---------- */
+.detail-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 1.25rem; padding: 1.75rem; }
+.detail-title { font-family: 'Montserrat', sans-serif; font-weight: 800; color: #0f172a; font-size: 1.1rem; margin-bottom: 1rem; }
+.detail-list { display: grid; grid-template-columns: auto 1fr; gap: .5rem 1.25rem; font-size: .9rem; }
+.detail-list dt { font-weight: 600; color: #64748b; white-space: nowrap; }
+.detail-list dd { color: #0f172a; }
+
+/* ---------- Modales ---------- */
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal.hidden { display: none; }
+.modal-box { background: #fff; border-radius: 1.25rem; padding: 1.75rem; width: 100%; max-width: 34rem; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,.3); }
+
+/* ---------- Espace admin ---------- */
+.admin-tab { padding: .55rem 1rem; border-radius: .7rem; font-size: .85rem; font-weight: 600; color: #475569; border: 1px solid transparent; white-space: nowrap; transition: all .2s; }
+.admin-tab:hover { color: #1d4ed8; background: #eff6ff; }
+.admin-tab.active { background: #1d4ed8; color: #fff; }
+.admin-table { width: 100%; font-size: .85rem; border-collapse: collapse; }
+.admin-table th { text-align: left; padding: .6rem .75rem; background: #f8fafc; color: #475569; font-weight: 700; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+.admin-table td { padding: .6rem .75rem; border-bottom: 1px solid #f1f5f9; color: #0f172a; vertical-align: top; }
+.admin-table tr:hover td { background: #f8fafc; }
+.admin-badge { display: inline-block; padding: .15rem .55rem; border-radius: 9999px; font-size: .72rem; font-weight: 700; }
+.admin-badge-pending { background: #fffbeb; color: #b45309; }
+.admin-badge-ok { background: #ecfdf5; color: #047857; }
+.admin-badge-ko { background: #fef2f2; color: #b91c1c; }
+.stat-mini { background: #fff; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1.1rem 1.25rem; }
+.stat-mini .v { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.6rem; color: #0f172a; }
+.stat-mini .l { font-size: .78rem; color: #64748b; margin-top: .15rem; }

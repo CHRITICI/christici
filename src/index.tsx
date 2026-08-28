@@ -10,20 +10,30 @@ import infos from './routes/infos'
 import search from './routes/search'
 import submissions from './routes/submissions'
 import home from './routes/home'
-import type { Bindings } from './types'
+import auth from './routes/auth'
+import reports from './routes/reports'
+import admin from './routes/admin'
+import { authMiddleware } from './lib/auth'
+import type { Bindings, AppVariables } from './types'
 import { HomePage } from './pages/home'
 import { EglisesPage } from './pages/eglises'
+import { EgliseDetailPage } from './pages/eglise-detail'
 import { DirectoryPage } from './pages/directory'
 import { InfosPage } from './pages/infos'
 import { MediasPage } from './pages/medias'
 import { AboutPage } from './pages/about'
 import { InscriptionPage } from './pages/inscription'
 import { SearchPage } from './pages/search'
+import { AccountPage } from './pages/account'
+import { AdminPage } from './pages/admin'
 
-const app = new Hono<{ Bindings: Bindings }>()
+const app = new Hono<{ Bindings: Bindings; Variables: AppVariables }>()
 
 // CORS pour les appels API
 app.use('/api/*', cors())
+
+// Chargement de l'utilisateur courant (cookie de session) pour toutes les API
+app.use('/api/*', authMiddleware)
 
 // Fichiers statiques (public/static/* → /static/*)
 app.use('/static/*', serveStatic({ root: './public' }))
@@ -37,6 +47,9 @@ app.route('/api/profiles', profiles)
 app.route('/api/infos', infos)
 app.route('/api/search', search)
 app.route('/api/submissions', submissions)
+app.route('/api/auth', auth)
+app.route('/api', reports) // /api/reports + /api/claims
+app.route('/api/admin', admin)
 app.get('/api/health', (c) => c.json({ status: 'ok', service: 'christici' }))
 
 // SEO : robots.txt + sitemap.xml
@@ -80,6 +93,33 @@ app.get('/eglises', (c) => {
     currentPath: '/eglises',
   })
   return c.render(<EglisesPage />)
+})
+
+// Fiche détaillée d'une église (donnée réelle : statut, source, signalement, revendication)
+app.get('/eglises/:slug', async (c) => {
+  const slug = c.req.param('slug')
+  const church = await c.env.DB
+    .prepare('SELECT * FROM churches WHERE slug = ? AND published = 1')
+    .bind(slug)
+    .first<any>()
+  if (!church) {
+    withLayout(c, { title: 'Église introuvable', currentPath: '/eglises' })
+    c.status(404)
+    return c.render(
+      <section class="max-w-2xl mx-auto px-4 sm:px-6 py-24 text-center">
+        <i class="fas fa-church text-5xl text-blue-200 mb-6"></i>
+        <h1 class="font-display text-3xl font-extrabold mb-4">Église introuvable</h1>
+        <p class="text-slate-500 mb-8">Cette fiche n'existe pas, a été retirée ou n'est pas encore publiée.</p>
+        <a href="/eglises" class="btn-primary-sm"><i class="fas fa-arrow-left mr-2"></i>Retour à l'annuaire</a>
+      </section>
+    )
+  }
+  withLayout(c, {
+    title: church.name,
+    description: (church.description || `${church.name} — église ${church.denomination || 'chrétienne'}${church.city ? ' à ' + church.city : ''}${church.country ? ', ' + church.country : ''}. Fiche Christici.`).slice(0, 300),
+    currentPath: '/eglises',
+  })
+  return c.render(<EgliseDetailPage church={church} />)
 })
 
 app.get('/organisations', (c) => {
@@ -173,6 +213,26 @@ app.get('/recherche', (c) => {
     currentPath: '/recherche',
   })
   return c.render(<SearchPage />)
+})
+
+// Compte utilisateur (inscription / connexion)
+app.get('/compte', (c) => {
+  withLayout(c, {
+    title: 'Mon compte',
+    description: 'Créez votre compte Christici ou connectez-vous pour revendiquer une fiche et suivre vos demandes.',
+    currentPath: '/compte',
+  })
+  return c.render(<AccountPage />)
+})
+
+// Espace administrateur (l'API exige le rôle admin ; la page gère l'affichage)
+app.get('/admin', (c) => {
+  withLayout(c, {
+    title: 'Administration',
+    description: 'Back-office Christici : modération des fiches, signalements, revendications et contenus.',
+    currentPath: '/admin',
+  })
+  return c.render(<AdminPage />)
 })
 
 // 404

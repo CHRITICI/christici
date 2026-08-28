@@ -37,6 +37,9 @@ directory.get('/', async (c) => {
   if (q.category) { where += ' AND cat.slug = ?'; params.push(q.category) }
   if (q.city) { where += ' AND e.city = ?'; params.push(q.city) }
   if (q.region) { where += ' AND e.region = ?'; params.push(q.region) }
+  if (q.status && ['a_verifier', 'verifiee', 'signalee'].includes(q.status)) {
+    where += ' AND e.status = ?'; params.push(q.status)
+  }
   if (q.q) {
     where += ' AND (e.name LIKE ? OR e.description LIKE ?)'
     const like = `%${q.q.slice(0, 100)}%`
