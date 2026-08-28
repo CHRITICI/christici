@@ -1,60 +1,60 @@
 # Christici
 
-> Le 1er site 100% chrétien au Togo — *Jusqu'au bout du monde !*
+> Annuaire mondial des églises chrétiennes — données réelles et vérifiables — *Jusqu'au bout du monde !*
 
 ## Project Overview
 - **Name**: Christici — https://christici.com
-- **Goal**: Révéler l'environnement chrétien au monde : répertorier les Églises, organisations, profils et services chrétiens sur une seule plateforme (annuaire + médias + infos), en démarrant par le Togo, conçue pour s'étendre à d'autres pays.
-- **Stack**: Hono + TypeScript + Cloudflare Pages + D1 (SQLite) + TailwindCSS (CDN)
+- **Goal**: Répertorier les églises, organisations, profils et services chrétiens du monde entier sur une seule plateforme, en commençant par le Togo, avec des **données réelles et vérifiables uniquement** (règle absolue : aucune donnée inventée).
+- **Stack**: Hono + TypeScript + Cloudflare Pages/Workers + D1 (SQLite) + TailwindCSS (CDN) + Leaflet (cartes OSM)
+
+## Principe fondateur : données réelles uniquement
+- **Source** : OpenStreetMap (extraits Geofabrik `.osm.pbf`, licence **ODbL 1.0** — attribution « © OpenStreetMap contributors » affichée sur le site).
+- Chaque fiche porte un **statut** : `a_verifier` / `verifiee` / `signalee`, et sa **provenance** (`source` + `source_ref`, ex. `node/631716353`).
+- Aucune fiche n'est créée sans nom réel ; les catégories vides affichent « en attente de contenu réel ».
+- Pipeline d'import : `tools/import_osm.py` (pyosmium) — déduponnage, normalisation, rapport JSON ; `tools/prod_import.py` pour le chargement production par lots.
 
 ## Fonctionnalités terminées
-- ✅ **Accueil** : hero, recherche rapide, statistiques, catégories, églises/organisations/profils mis en avant, événements, nouvelles, médias, CTA inscription
-- ✅ **Trouver une église** : filtres région / ville / confession / mot-clé + **géolocalisation** (« autour de ma position », non bloquante si refusée) + pagination
-- ✅ **Organisations chrétiennes** : associations, bibliothèques, instituts bibliques, centres & camps de prière, formations musicales (15 catégories)
-- ✅ **Profils chrétiens** : musiciens, sociologues, groupes musicaux (architecture extensible)
-- ✅ **Affaires chrétiennes** : microfinances, hôpitaux, bars sans alcool, restaurants, librairies, studios
-- ✅ **Infos** : événements, nouvelles, offres d'emploi, publications
-- ✅ **Médias** : vidéos, musique, images, articles (onglets)
-- ✅ **Recherche globale** sur toutes les entités
-- ✅ **Inscription** : formulaire public de demande (table `submissions`, modération prévue)
-- ✅ **SEO** : title/meta par page, Open Graph, favicon logo officiel, canonical, robots.txt, sitemap.xml, page 404
-- ✅ **Identité visuelle** : logo Christici officiel, charte bleu/orange inspirée des documents historiques
+- ✅ **Annuaire églises** : 1042 églises réelles du Togo (OSM), filtres pays/région/ville/confession/statut/mot-clé, géolocalisation, pagination
+- ✅ **Carte interactive Leaflet** (tuiles OSM) sur la liste + embed OSM sur chaque fiche
+- ✅ **Fiche détaillée** `/eglises/:slug` : statut, provenance ODbL, carte, Signaler une erreur, Revendiquer la fiche
+- ✅ **Comptes utilisateurs** : inscription/connexion (PBKDF2 100k itérations via Web Crypto, sessions 14 j, cookie httpOnly/secure/Lax)
+- ✅ **Signalements** (`/api/reports`) et **revendications de fiches** (`/api/claims`) avec modération
+- ✅ **Back-office admin** `/admin` : statistiques, CRUD 8 entités, signalements, revendications (approbation → fiche vérifiée), inscriptions, pays, utilisateurs, détection de doublons (nom+ville / géo)
+- ✅ Organisations, profils, affaires, infos (événements/nouvelles/emplois/publications), médias, recherche globale, inscription publique, SEO complet
 
 ## URLs (API)
-- `GET /api/home` — agrégat page d'accueil (+ stats)
-- `GET /api/churches` — filtres : `country, region, city, district, denomination, q, near=lat,lng, radius, page, limit`
-- `GET /api/churches/filters` · `GET /api/churches/:slug`
-- `GET /api/directory?grp=organisation|affaire&category=&city=&q=` · `/categories` · `/:slug`
-- `GET /api/profiles?category=&city=&available=1&q=` · `/:slug`
-- `GET /api/infos/events|news|jobs|publications` (+ `/events/:slug`, `/news/:slug`)
-- `GET /api/search?q=` — recherche globale
-- `POST /api/submissions` — demande d'inscription `{kind, name, contact, category?, city?, message?}`
-- `GET /api/health`
+- `GET /api/churches` — filtres : `country, region, city, district, denomination, status, q, near=lat,lng, radius, page, limit`
+- `GET /api/churches/:slug` · `/api/churches/filters`
+- `GET /api/directory?status=` · `GET /api/profiles?status=`
+- `POST /api/auth/register|login|logout` · `GET /api/auth/me`
+- `POST /api/reports` · `POST /api/claims`
+- `GET /api/admin/stats|list/:entity|reports|claims|submissions|countries|users|imports|duplicates/churches` (rôle admin requis)
+- `GET /api/home` · `/api/search?q=` · `/api/infos/*` · `POST /api/submissions` · `GET /api/health`
 
 ## Data Architecture
-- **Tables D1** : `media_items` (vidéos/musique/images/articles), `categories` (15 catégories, 3 groupes), `churches` (géolocalisées, multi-pays), `directory_entries` (organisations & affaires), `profiles`, `events`, `news`, `jobs`, `publications`, `submissions`
-- **Index** : région, ville, quartier, confession, pays, catégorie, dates, featured/published
-- **Géolocalisation** : pré-filtre SQL (bounding box) + distance Haversine exacte en JS (D1 n'autorise pas les fonctions math SQL)
-- **Données** : entrées de **démonstration** clairement marquées « (démo) » — aucune institution réelle
+- **Tables D1** : `churches`, `directory_entries`, `profiles`, `events`, `news`, `jobs`, `publications`, `media_items`, `categories`, `submissions` + `users`, `sessions`, `reports`, `claims`, `countries`, `import_runs` (migration 0003)
+- **Statuts & provenance** : colonnes `status`, `source`, `source_ref`, `verified_at`, `claimed_by` sur les entités principales
+- **Géolocalisation** : pré-filtre SQL (bounding box) + distance Haversine exacte en JS
+
+## Données en production
+- **Togo** : 1042 églises (OpenStreetMap/Geofabrik, ODbL) — toutes au statut « À vérifier », en attente de validation communautaire
+- Autres entités : vides en production (« en attente de contenu réel ») — les données de démonstration ne sont chargées qu'en environnement local de test
 
 ## Non implémenté (prochaines étapes)
-- ⬜ Pages fiches détaillées (`/eglises/:slug`, fiche organisation/profil) avec carte
-- ⬜ Back-office d'administration sécurisé (validation des inscriptions, CRUD contenus)
-- ⬜ Comptes utilisateurs & modification de fiche par le propriétaire
-- ⬜ Carte interactive (Leaflet) et upload de fichiers (R2)
-- ⬜ Tailwind en build local (remplacer le CDN avant montée en charge)
-- ⬜ Déploiement production + domaine christici.com
+- ⬜ Extension pays par pays (prochain pays à valider avec l'utilisateur)
+- ⬜ Fiches détaillées organisations/profils
+- ⬜ Upload de fichiers (R2), Tailwind en build local
+- ⬜ Vérification de masse des fiches (workflow communautaire)
 
 ## Dev local (sandbox)
 ```bash
 npm run build
 npx wrangler d1 migrations apply christici-production --local
-npx wrangler d1 execute christici-production --local --file=./seed.sql
-npx wrangler d1 execute christici-production --local --file=./seed_directory.sql
 pm2 start ecosystem.config.cjs   # wrangler pages dev dist --d1 --local :3000
 ```
 
 ## Deployment
-- **Platform**: Cloudflare Pages · **Status**: ❌ Pas encore déployé (en attente du choix du chemin : hébergement Genspark ou compte Cloudflare propre)
-- **Domaine cible**: christici.com · **Secrets**: aucun dans le dépôt
-- **Last Updated**: 2026-08-27
+- **Platform**: Cloudflare (hébergement géré Genspark, Workers for Platform)
+- **Status**: ✅ Actif — https://christici.com (custom domain lié)
+- **Compte admin**: `admin@christici.com` (mot de passe communiqué une seule fois à l'utilisateur, jamais commité)
+- **Last Updated**: 2026-08-28
