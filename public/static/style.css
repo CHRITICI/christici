@@ -79,12 +79,44 @@ body {
 }
 .btn-ghost-sm:hover { color: var(--c-primary); border-color: var(--c-primary-200); }
 
-/* ---------- Hero ---------- */
-.hero-pattern {
-  position: absolute; inset: 0; opacity: .35; pointer-events: none;
-  background:
-    radial-gradient(circle at 20% 25%, rgba(251, 191, 36, .18), transparent 40%),
-    radial-gradient(circle at 80% 75%, rgba(147, 197, 253, .25), transparent 45%);
+/* ---------- Hero « Aurore » — la lumière sur la montagne ---------- */
+.hero-dawn {
+  position: relative;
+  background: linear-gradient(180deg, #0f1c40 0%, #16295c 38%, var(--c-primary-dark) 78%, var(--c-primary) 100%);
+}
+.hero-sky {
+  position: absolute; inset: 0; pointer-events: none; opacity: .7;
+  background-image:
+    radial-gradient(1.6px 1.6px at 14% 20%, rgba(255,255,255,.55) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 33% 10%, rgba(255,255,255,.4) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 58% 17%, rgba(255,255,255,.48) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 76% 11%, rgba(255,255,255,.36) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 89% 26%, rgba(255,255,255,.42) 50%, transparent 51%);
+}
+.hero-horizon {
+  position: absolute; left: 50%; bottom: -32vh; transform: translateX(-50%);
+  width: 170vw; height: 72vh; pointer-events: none;
+  border-radius: 50% 50% 0 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,.45) 0%, rgba(249,115,22,.16) 42%, transparent 68%);
+  border-top: 1.5px solid rgba(253, 224, 138, .5);
+  box-shadow: 0 -24px 90px rgba(251,191,36,.30);
+}
+.hero-eyebrow {
+  color: var(--c-accent-light); font-weight: 600; letter-spacing: .18em;
+  text-transform: uppercase; font-size: .72rem; margin-bottom: 1rem;
+}
+@media (min-width: 640px) { .hero-eyebrow { font-size: .8rem; } }
+.hero-accent {
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 500;
+  background: linear-gradient(90deg, #fde68a, var(--c-accent-light), var(--c-accent));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-horizon { animation: heroGlow 9s ease-in-out infinite; }
+  @keyframes heroGlow {
+    0%, 100% { box-shadow: 0 -24px 90px rgba(251,191,36,.26); }
+    50% { box-shadow: 0 -26px 130px rgba(251,191,36,.48); }
+  }
 }
 
 /* ---------- Page hero (sous-pages) ---------- */

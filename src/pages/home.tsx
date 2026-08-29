@@ -22,15 +22,16 @@ export function HomePage() {
   return (
     <>
       {/* ===== Hero ===== */}
-      <section id="hero-section" class="relative bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 text-white overflow-hidden">
-        <div class="hero-pattern" aria-hidden="true"></div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
-          <img src="/static/images/logo.png" alt="Christici" class="h-16 sm:h-20 w-auto mx-auto bg-white rounded-2xl px-5 py-2.5 shadow-xl mb-8" />
-          <p class="text-amber-400 font-semibold tracking-widest uppercase text-xs sm:text-sm mb-4">
+      <section id="hero-section" class="relative hero-dawn text-white overflow-hidden">
+        <div class="hero-sky" aria-hidden="true"></div>
+        <div class="hero-horizon" aria-hidden="true"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-24 sm:pt-20 sm:pb-32 text-center">
+          <img src="/static/images/logo.png" alt="Christici" class="h-16 sm:h-20 w-auto mx-auto bg-white rounded-2xl px-5 py-2.5 shadow-2xl mb-7" />
+          <p class="hero-eyebrow">
             Le 1<sup>er</sup> site 100% chrétien au Togo
           </p>
-          <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-            Trouvez une église.<br class="hidden sm:block" /> Découvrez le monde chrétien.
+          <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-[1.08]">
+            Trouvez une église.<br class="hidden sm:block" /> Découvrez le <span class="hero-accent">monde chrétien</span>.
           </h1>
           <p class="max-w-2xl mx-auto text-lg sm:text-xl text-blue-100 leading-relaxed mb-10">
             <span id="hero-church-count">Plus d'un millier</span> d'églises réelles déjà répertoriées au
