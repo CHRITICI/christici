@@ -1,4 +1,23 @@
 // Page d'accueil Christici
+// Skeletons de chargement SSR (remplacés par les vraies données côté client)
+const SkeletonCards = () => (
+  <>
+    {[0, 1, 2].map((i) => (
+      <div class="skeleton-card" aria-hidden="true" key={i}>
+        <div style={{ display: 'flex', gap: '.75rem', alignItems: 'flex-start' }}>
+          <div class="skeleton-dot"></div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '.55rem' }}>
+            <div class="skeleton-line" style={{ width: '70%' }}></div>
+            <div class="skeleton-line" style={{ width: '40%' }}></div>
+          </div>
+        </div>
+        <div class="skeleton-line" style={{ width: '100%' }}></div>
+        <div class="skeleton-line" style={{ width: '85%' }}></div>
+      </div>
+    ))}
+  </>
+)
+
 export function HomePage() {
   return (
     <>
@@ -11,22 +30,29 @@ export function HomePage() {
             Le 1<sup>er</sup> site 100% chrétien au Togo
           </p>
           <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-            Bienvenue sur Christici
+            Trouvez une église.<br class="hidden sm:block" /> Découvrez le monde chrétien.
           </h1>
           <p class="max-w-2xl mx-auto text-lg sm:text-xl text-blue-100 leading-relaxed mb-10">
-            La plateforme qui révèle l'environnement chrétien au monde&nbsp;: trouvez une église,
-            découvrez les organisations, profils et services chrétiens près de chez vous.
+            <span id="hero-church-count">Plus d'un millier</span> d'églises réelles déjà répertoriées au
+            Togo — et bientôt partout&nbsp;: organisations, profils, événements et services chrétiens,
+            avec des données vérifiables.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/medias" class="btn-hero-primary">
-              <i class="fas fa-play mr-2"></i>Explorer les contenus
-            </a>
-            <a href="/eglises" class="btn-hero-secondary">
+            <a href="/eglises" class="btn-hero-primary">
               <i class="fas fa-church mr-2"></i>Trouver une église
+            </a>
+            <a href="/medias" class="btn-hero-secondary">
+              <i class="fas fa-play mr-2"></i>Explorer les contenus
             </a>
             <a href="/organisations" class="btn-hero-secondary">
               <i class="fas fa-people-group mr-2"></i>Découvrir les organisations
             </a>
+          </div>
+          {/* Signaux de confiance — fondés sur le modèle de données réel */}
+          <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-9 text-sm text-blue-100">
+            <span><i class="fas fa-shield-halved mr-1.5 text-amber-400"></i>Données réelles uniquement</span>
+            <span><i class="fas fa-circle-check mr-1.5 text-amber-400"></i>Statut de vérification sur chaque fiche</span>
+            <span><i class="fas fa-earth-africa mr-1.5 text-amber-400"></i>Le Togo d'abord, puis le monde</span>
           </div>
         </div>
       </section>
@@ -45,6 +71,11 @@ export function HomePage() {
             <i class="fas fa-search sm:mr-2"></i><span class="hidden sm:inline">Rechercher</span>
           </button>
         </form>
+        <p class="text-center text-sm mt-4">
+          <a href="/eglises" class="text-blue-700 font-semibold hover:underline">
+            <i class="fas fa-location-crosshairs mr-1"></i>ou trouvez les églises autour de votre position
+          </a>
+        </p>
       </section>
 
       {/* ===== Statistiques ===== */}
@@ -121,8 +152,22 @@ export function HomePage() {
             <a href="/eglises" class="link-more">Toutes les églises <i class="fas fa-arrow-right ml-1"></i></a>
           </div>
           <div id="home-churches-grid" class="grid-cards">
-            <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+            <SkeletonCards />
           </div>
+        </div>
+      </section>
+
+      {/* ===== Appel à l'inscription ===== */}
+      <section id="cta-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-3xl text-white text-center px-6 py-14 shadow-xl">
+          <h2 class="font-display text-3xl sm:text-4xl font-extrabold mb-4">Votre organisation chrétienne mérite d'être visible</h2>
+          <p class="max-w-xl mx-auto text-blue-100 mb-8">
+            Église, association, institut, entreprise ou talent chrétien&nbsp;: rejoignez Christici
+            et communiquez sur vos prestations, où que vous soyez.
+          </p>
+          <a href="/inscription" class="btn-hero-primary inline-flex">
+            <i class="fas fa-user-plus mr-2"></i>Inscrire mon organisation
+          </a>
         </div>
       </section>
 
@@ -136,7 +181,7 @@ export function HomePage() {
           <a href="/organisations" class="link-more">Toutes les organisations <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
         <div id="home-organisations-grid" class="grid-cards">
-          <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+          <SkeletonCards />
         </div>
       </section>
 
@@ -149,7 +194,7 @@ export function HomePage() {
               <a href="/infos" class="link-more">Tout voir <i class="fas fa-arrow-right ml-1"></i></a>
             </div>
             <div id="home-events-list" class="space-y-4">
-              <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+              <SkeletonCards />
             </div>
           </div>
           <div>
@@ -158,7 +203,7 @@ export function HomePage() {
               <a href="/infos#nouvelles" class="link-more">Tout voir <i class="fas fa-arrow-right ml-1"></i></a>
             </div>
             <div id="home-news-list" class="space-y-4">
-              <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+              <SkeletonCards />
             </div>
           </div>
         </div>
@@ -174,7 +219,7 @@ export function HomePage() {
           <a href="/profils" class="link-more">Tous les profils <i class="fas fa-arrow-right ml-1"></i></a>
         </div>
         <div id="home-profils-grid" class="grid-cards">
-          <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+          <SkeletonCards />
         </div>
       </section>
 
@@ -195,24 +240,11 @@ export function HomePage() {
             <button class="media-tab" data-tab="article"><i class="fas fa-pen-nib mr-1.5"></i>Articles</button>
           </div>
           <div id="home-media-grid" class="grid-cards">
-            <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement…</div>
+            <SkeletonCards />
           </div>
         </div>
       </section>
 
-      {/* ===== Appel à l'inscription ===== */}
-      <section id="cta-section" class="max-w-7xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-700 rounded-3xl text-white text-center px-6 py-14 shadow-xl">
-          <h2 class="font-display text-3xl sm:text-4xl font-extrabold mb-4">Votre organisation chrétienne mérite d'être visible</h2>
-          <p class="max-w-xl mx-auto text-blue-100 mb-8">
-            Église, association, institut, entreprise ou talent chrétien&nbsp;: rejoignez Christici
-            et communiquez sur vos prestations, où que vous soyez.
-          </p>
-          <a href="/inscription" class="btn-hero-primary inline-flex">
-            <i class="fas fa-user-plus mr-2"></i>Inscrire mon organisation
-          </a>
-        </div>
-      </section>
     </>
   )
 }

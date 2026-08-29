@@ -290,7 +290,7 @@ window.Christici = {
   const C = window.Christici;
   let data = null;
   try {
-    const res = await axios.get('/api/home');
+    const res = await axios.get('/api/home', { timeout: 15000 });
     data = res.data;
   } catch (err) {
     console.error(err);
@@ -312,6 +312,12 @@ window.Christici = {
     const num = card.querySelector('.stat-num');
     if (num) num.textContent = statValues[i];
   });
+
+  // Compteur réel dans le hero (donnée dynamique, jamais figée)
+  const heroCount = document.getElementById('hero-church-count');
+  if (heroCount && data.stats.churches > 0) {
+    heroCount.textContent = data.stats.churches.toLocaleString('fr-FR');
+  }
 
   // Églises
   const churchesGrid = document.getElementById('home-churches-grid');

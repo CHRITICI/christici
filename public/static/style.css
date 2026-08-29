@@ -130,6 +130,9 @@ body {
 .cat-card h3 { font-weight: 700; color: var(--c-ink-900); margin-bottom: .3rem; }
 .cat-card p { font-size: .82rem; color: var(--c-ink-500); line-height: 1.5; }
 
+/* Sur très petit écran : descriptions des cartes catégories masquées (densité mobile) */
+@media (max-width: 639px) { .cat-card p { display: none; } }
+
 /* ---------- Grille de cartes annuaire ---------- */
 .grid-cards { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
 @media (min-width: 640px) { .grid-cards { grid-template-columns: repeat(2, 1fr); } }
