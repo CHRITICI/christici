@@ -63,6 +63,7 @@ export const renderer = jsxRenderer(
           <link href="/static/style.css" rel="stylesheet" />
         </head>
         <body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+          <a href="#main-content" class="skip-link">Aller au contenu principal</a>
           {/* ===== Bandeau slogan ===== */}
           <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 text-white text-center text-xs sm:text-sm py-1.5 px-4 font-medium tracking-wide">
             Le 1<sup>er</sup> site 100% chrétien au Togo — <span class="italic">Jusqu'au bout du monde&nbsp;!</span>
@@ -126,7 +127,7 @@ export const renderer = jsxRenderer(
             </div>
           </header>
 
-          <main class="flex-1">{children}</main>
+          <main id="main-content" class="flex-1">{children}</main>
 
           {/* ===== Pied de page ===== */}
           <footer class="bg-slate-900 text-slate-300 mt-16">
