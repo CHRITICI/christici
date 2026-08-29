@@ -358,6 +358,10 @@ body {
 .entry-card .entry-actions { position: relative; z-index: 1; }
 .entry-card:focus-within { border-color: var(--c-primary-300); box-shadow: 0 16px 32px -22px rgba(30, 64, 175, .4); }
 
+/* ---------- Carte annuaire ---------- */
+.map-canvas { height: 520px; background: var(--c-ink-100); }
+@media (max-width: 639px) { .map-canvas { height: 62vh; min-height: 400px; } }
+
 /* ---------- Bouton itinéraire ---------- */
 .btn-route {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;

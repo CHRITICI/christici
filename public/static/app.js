@@ -104,7 +104,7 @@ window.Christici = {
     const location = [ch.district, ch.city, ch.region].filter(Boolean).map(e).join(' · ');
     const distance = typeof ch.distance_km === 'number' ? `<span class="tag tag-green"><i class="fas fa-location-dot mr-1"></i>${ch.distance_km.toFixed(1)} km</span>` : '';
     return `
-      <article class="entry-card">
+      <article class="entry-card" ${ch.latitude != null && ch.longitude != null ? `data-lat="${ch.latitude}" data-lng="${ch.longitude}" data-slug="${e(ch.slug)}"` : ''}>
         <div class="flex items-start gap-3">
           <div class="entry-icon"><i class="fas fa-church"></i></div>
           <div class="min-w-0">
@@ -124,6 +124,7 @@ window.Christici = {
         </div>
         <div class="entry-actions">
           <a href="/eglises/${e(ch.slug)}"><i class="fas fa-circle-info mr-1"></i>Voir la fiche</a>
+          ${ch.latitude != null ? `<a href="/eglises" class="js-locate hidden"><i class="fas fa-map-location-dot mr-1"></i>Carte</a>` : ''}
           ${ch.website ? `<a href="${e(ch.website)}" target="_blank" rel="noopener noreferrer"><i class="fas fa-arrow-up-right-from-square mr-1"></i>Site web</a>` : ''}
         </div>
       </article>`;

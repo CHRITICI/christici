@@ -12,11 +12,12 @@
   const selStatus = document.getElementById('filter-status');
   const inputQ = document.getElementById('filter-q');
 
-  let state = { page: 1, near: null, view: 'list' };
+  let state = { page: 1, near: null, view: 'list', focusSlug: null };
   let citiesByRegion = [];
   let lastItems = [];
   let map = null;
   let markersLayer = null;
+  let markersBySlug = {};
 
   async function loadFilters() {
     try {
@@ -46,7 +47,8 @@
     countEl.textContent = '';
     paginationEl.innerHTML = '';
 
-    const params = { page, limit: 12 };
+    // Vue carte : on charge plus de résultats pour une vision d'ensemble (max API = 100)
+    const params = { page, limit: state.view === 'map' ? 100 : 12 };
     if (state.near) {
       params.near = state.near;
       params.radius = 100;
@@ -65,7 +67,7 @@
         ? `${data.total} église${data.total > 1 ? 's' : ''} trouvée${data.total > 1 ? 's' : ''}${state.near ? ' autour de votre position' : ''}`
         : '';
       render();
-      C.pagination(paginationEl, data.page, data.pages, load);
+      if (state.view === 'list') C.pagination(paginationEl, data.page, data.pages, load);
     } catch (e) {
       console.error(e);
       grid.innerHTML = C.error('Connexion lente ou interrompue — la recherche n\u2019a pas abouti.') +
@@ -86,6 +88,8 @@
       grid.classList.remove('hidden');
       mapEl.classList.add('hidden');
       grid.innerHTML = lastItems.length ? lastItems.map((ch) => C.churchCard(ch)).join('') : C.empty(emptyText());
+      // Les actions « Carte » ne sont visibles que sur cette page (la carte n'existe qu'ici)
+      grid.querySelectorAll('.js-locate').forEach((a) => a.classList.remove('hidden'));
     } else {
       grid.classList.add('hidden');
       mapEl.classList.remove('hidden');
@@ -104,10 +108,15 @@
         maxZoom: 19,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
-      markersLayer = L.layerGroup().addTo(map);
+      // Clustering des marqueurs (repli sur un simple groupe si le plugin CDN est indisponible)
+      markersLayer = typeof L.markerClusterGroup === 'function'
+        ? L.markerClusterGroup({ maxClusterRadius: 48, showCoverageOnHover: false })
+        : L.layerGroup();
+      markersLayer.addTo(map);
     }
     setTimeout(() => map.invalidateSize(), 50);
     markersLayer.clearLayers();
+    markersBySlug = {};
 
     const withCoords = lastItems.filter((ch) => ch.latitude != null && ch.longitude != null);
     if (!withCoords.length) {
@@ -117,13 +126,17 @@
     const bounds = [];
     withCoords.forEach((ch) => {
       const marker = L.marker([ch.latitude, ch.longitude]);
+      const locLine = [ch.city, ch.country].filter(Boolean).map(C.escapeHtml).join(', ');
       marker.bindPopup(
-        `<strong>${C.escapeHtml(ch.name)}</strong><br>` +
-        `${ch.denomination ? C.escapeHtml(C.denomLabel(ch.denomination)) + '<br>' : ''}` +
-        `${[ch.city, ch.country].filter(Boolean).map(C.escapeHtml).join(', ')}<br>` +
-        `<a href="/eglises/${encodeURIComponent(ch.slug)}">Voir la fiche →</a>`
+        `<strong>${C.escapeHtml(ch.name)}</strong>` +
+        `${ch.denomination ? '<br>' + C.escapeHtml(C.denomLabel(ch.denomination)) : ''}` +
+        `${locLine ? '<br>' + locLine : ''}` +
+        `${typeof ch.distance_km === 'number' ? `<br>À ${ch.distance_km.toFixed(1)} km de votre position` : ''}` +
+        `<br><a href="/eglises/${encodeURIComponent(ch.slug)}">Voir la fiche →</a> · ` +
+        `<a href="https://www.google.com/maps/dir/?api=1&destination=${ch.latitude},${ch.longitude}" target="_blank" rel="noopener noreferrer">Itinéraire</a>`
       );
       markersLayer.addLayer(marker);
+      markersBySlug[ch.slug] = marker;
       bounds.push([ch.latitude, ch.longitude]);
     });
     if (state.near) {
@@ -131,7 +144,19 @@
       L.circle([lat, lng], { radius: 300, color: '#1d4ed8' }).addTo(markersLayer);
       bounds.push([lat, lng]);
     }
-    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+    // Focus demandé depuis la liste (« Carte » sur une fiche)
+    if (state.focusSlug && markersBySlug[state.focusSlug]) {
+      const target = markersBySlug[state.focusSlug];
+      state.focusSlug = null;
+      if (typeof markersLayer.zoomToShowLayer === 'function') {
+        markersLayer.zoomToShowLayer(target, () => target.openPopup());
+      } else {
+        map.setView(target.getLatLng(), 15);
+        target.openPopup();
+      }
+    } else {
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+    }
   }
 
   // Bascule Liste / Carte
@@ -141,14 +166,28 @@
     btnList.addEventListener('click', () => {
       state.view = 'list';
       btnList.classList.add('active'); btnMap.classList.remove('active');
-      render();
+      load(1); // recharger avec la limite « liste »
     });
     btnMap.addEventListener('click', () => {
       state.view = 'map';
       btnMap.classList.add('active'); btnList.classList.remove('active');
-      render();
+      load(1); // recharger avec la limite « carte » (vision d'ensemble)
     });
   }
+
+  // Synchronisation liste → carte : le bouton « Carte » d'une fiche centre la carte dessus
+  grid.addEventListener('click', (e) => {
+    const loc = e.target.closest('.js-locate');
+    if (!loc) return;
+    e.preventDefault();
+    const card = loc.closest('.entry-card');
+    if (!card || !card.dataset.lat) return;
+    state.focusSlug = card.dataset.slug || null;
+    state.view = 'map';
+    btnMap.classList.add('active');
+    btnList.classList.remove('active');
+    load(1);
+  });
 
   // Filtres
   document.getElementById('btn-filter').addEventListener('click', () => { state.near = null; geoStatus.classList.add('hidden'); load(1); });

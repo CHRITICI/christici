@@ -62,9 +62,21 @@ export function EglisesPage() {
           </div>
         </div>
         <div id="churches-grid" class="grid-cards">
-          <div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> Chargement des églises…</div>
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div class="skeleton-card" aria-hidden="true" key={i}>
+              <div style={{ display: 'flex', gap: '.75rem', alignItems: 'flex-start' }}>
+                <div class="skeleton-dot"></div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '.55rem' }}>
+                  <div class="skeleton-line" style={{ width: '70%' }}></div>
+                  <div class="skeleton-line" style={{ width: '40%' }}></div>
+                </div>
+              </div>
+              <div class="skeleton-line" style={{ width: '100%' }}></div>
+              <div class="skeleton-line" style={{ width: '85%' }}></div>
+            </div>
+          ))}
         </div>
-        <div id="churches-map" class="hidden rounded-xl overflow-hidden border border-slate-200" style={{ height: '480px' }}></div>
+        <div id="churches-map" class="map-canvas hidden rounded-xl overflow-hidden border border-slate-200"></div>
         <div id="pagination" class="flex justify-center gap-2 mt-10"></div>
       </section>
 
@@ -87,7 +99,10 @@ export function EglisesPage() {
       </section>
 
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
       <script defer src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script defer src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
       <script defer src="/static/pages/eglises.js"></script>
     </>
