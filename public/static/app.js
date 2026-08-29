@@ -46,6 +46,40 @@ window.Christici = {
     return `<div class="loading-state"><i class="fas fa-circle-notch fa-spin"></i> ${text || 'Chargement…'}</div>`;
   },
 
+  // Skeletons de chargement (perception de rapidité, connexions lentes)
+  skeletonCards(n) {
+    const card = `
+      <div class="skeleton-card" aria-hidden="true">
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <div class="skeleton-dot"></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:.55rem">
+            <div class="skeleton-line" style="width:70%"></div>
+            <div class="skeleton-line" style="width:40%"></div>
+          </div>
+        </div>
+        <div class="skeleton-line" style="width:100%"></div>
+        <div class="skeleton-line" style="width:85%"></div>
+      </div>`;
+    return `<div role="status" aria-live="polite" style="display:contents"><span class="sr-only">Chargement en cours…</span>${card.repeat(n || 6)}</div>`;
+  },
+
+  // Libellés français des confessions (valeurs brutes OSM → affichage)
+  denomLabel(value) {
+    if (!value) return '';
+    const map = {
+      roman_catholic: 'Catholique', catholic: 'Catholique',
+      evangelical: 'Évangélique', protestant: 'Protestante',
+      baptist: 'Baptiste', pentecostal: 'Pentecôtiste',
+      anglican: 'Anglicane', orthodox: 'Orthodoxe',
+      methodist: 'Méthodiste', lutheran: 'Luthérienne',
+      adventist: 'Adventiste', seventh_day_adventist: 'Adventiste du 7e jour',
+      apostolic: 'Apostolique', reformed: 'Réformée',
+      assemblies_of_god: 'Assemblée de Dieu', mennonite: 'Mennonite',
+      presbyterian: 'Presbytérienne', quaker: 'Quaker',
+    };
+    return map[value] || value;
+  },
+
   empty(text) {
     return `<div class="empty-state"><i class="fas fa-folder-open text-3xl mb-3 text-slate-300"></i><p>${text}</p></div>`;
   },
@@ -74,10 +108,10 @@ window.Christici = {
         <div class="flex items-start gap-3">
           <div class="entry-icon"><i class="fas fa-church"></i></div>
           <div class="min-w-0">
-            <h3><a href="/eglises/${e(ch.slug)}" class="hover:text-blue-700">${e(ch.name)}</a></h3>
+            <h3><a href="/eglises/${e(ch.slug)}" class="card-link hover:text-blue-700">${e(ch.name)}</a></h3>
             <div class="entry-tags mt-1.5">
               ${this.statusBadge(ch.status)}
-              ${ch.denomination ? `<span class="tag tag-blue">${e(ch.denomination)}</span>` : ''}
+              ${ch.denomination ? `<span class="tag tag-blue">${e(this.denomLabel(ch.denomination))}</span>` : ''}
               ${ch.featured ? '<span class="tag tag-amber"><i class="fas fa-star mr-1"></i>À la une</span>' : ''}
               ${distance}
             </div>

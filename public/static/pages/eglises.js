@@ -42,7 +42,7 @@
 
   async function load(page) {
     state.page = page;
-    if (state.view === 'list') grid.innerHTML = C.loading('Recherche des églises…');
+    if (state.view === 'list') grid.innerHTML = C.skeletonCards(6);
     countEl.textContent = '';
     paginationEl.innerHTML = '';
 
@@ -59,7 +59,7 @@
     }
 
     try {
-      const { data } = await axios.get('/api/churches', { params });
+      const { data } = await axios.get('/api/churches', { params, timeout: 15000 });
       lastItems = data.items || [];
       countEl.textContent = data.total
         ? `${data.total} église${data.total > 1 ? 's' : ''} trouvée${data.total > 1 ? 's' : ''}${state.near ? ' autour de votre position' : ''}`
@@ -68,7 +68,10 @@
       C.pagination(paginationEl, data.page, data.pages, load);
     } catch (e) {
       console.error(e);
-      grid.innerHTML = C.error();
+      grid.innerHTML = C.error('Connexion lente ou interrompue — la recherche n\u2019a pas abouti.') +
+        '<div style="grid-column:1/-1;text-align:center;margin-top:-1rem"><button id="btn-retry" class="btn-primary-sm"><i class="fas fa-rotate-right" style="margin-right:.5rem"></i>Réessayer</button></div>';
+      const retry = document.getElementById('btn-retry');
+      if (retry) retry.addEventListener('click', () => load(page));
     }
   }
 
@@ -116,7 +119,7 @@
       const marker = L.marker([ch.latitude, ch.longitude]);
       marker.bindPopup(
         `<strong>${C.escapeHtml(ch.name)}</strong><br>` +
-        `${ch.denomination ? C.escapeHtml(ch.denomination) + '<br>' : ''}` +
+        `${ch.denomination ? C.escapeHtml(C.denomLabel(ch.denomination)) + '<br>' : ''}` +
         `${[ch.city, ch.country].filter(Boolean).map(C.escapeHtml).join(', ')}<br>` +
         `<a href="/eglises/${encodeURIComponent(ch.slug)}">Voir la fiche →</a>`
       );
