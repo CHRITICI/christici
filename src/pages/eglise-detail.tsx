@@ -94,6 +94,33 @@ export function EgliseDetailPage({ church: ch }: Props) {
           ) : null}
         </div>
 
+        {/* Actions rapides — uniquement avec les données réelles disponibles */}
+        <div class="flex flex-wrap gap-3 mb-8" role="navigation" aria-label="Actions">
+          {hasCoords ? (
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${ch.latitude},${ch.longitude}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-route"
+            >
+              <i class="fas fa-diamond-turn-right"></i>Itinéraire
+            </a>
+          ) : null}
+          {ch.phone ? (
+            <a href={`tel:${ch.phone}`} class="btn-primary-sm">
+              <i class="fas fa-phone mr-2"></i>Appeler
+            </a>
+          ) : null}
+          {ch.website ? (
+            <a href={ch.website} target="_blank" rel="noopener noreferrer" class="btn-ghost-sm">
+              <i class="fas fa-arrow-up-right-from-square mr-2"></i>Site web
+            </a>
+          ) : null}
+          <button type="button" id="btn-share" class="btn-ghost-sm">
+            <i class="fas fa-share-nodes mr-2"></i>Partager
+          </button>
+        </div>
+
         <div class="grid lg:grid-cols-3 gap-8">
           {/* Colonne principale */}
           <div class="lg:col-span-2 space-y-8">

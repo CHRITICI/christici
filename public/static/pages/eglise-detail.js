@@ -37,6 +37,30 @@
   });
   document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeModals(); });
 
+  // Partage de la fiche — Web Share API avec repli presse-papiers
+  const btnShare = document.getElementById('btn-share');
+  if (btnShare) {
+    btnShare.addEventListener('click', async () => {
+      const url = location.href;
+      const title = document.title || 'Christici';
+      try {
+        if (navigator.share) {
+          await navigator.share({ title, text: title, url });
+          return;
+        }
+        await navigator.clipboard.writeText(url);
+        const old = btnShare.innerHTML;
+        btnShare.innerHTML = '<i class="fas fa-check mr-2"></i>Lien copié !';
+        setTimeout(() => { btnShare.innerHTML = old; }, 2000);
+      } catch (err) {
+        if (err && err.name === 'AbortError') return; // partage annulé par l'utilisateur
+        const old = btnShare.innerHTML;
+        btnShare.innerHTML = '<i class="fas fa-link mr-2"></i>Copiez le lien de la barre d\u2019adresse';
+        setTimeout(() => { btnShare.innerHTML = old; }, 2500);
+      }
+    });
+  }
+
   function showMsg(el, text, ok) {
     el.textContent = text;
     el.classList.remove('hidden', 'form-ok', 'form-err');
