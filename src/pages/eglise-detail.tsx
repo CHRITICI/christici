@@ -37,6 +37,20 @@ function statusInfo(status?: string): { label: string; cls: string; icon: string
   }
 }
 
+// Libellés français des confessions (valeurs brutes OSM → affichage)
+const DENOM_LABELS: Record<string, string> = {
+  roman_catholic: 'Catholique', catholic: 'Catholique',
+  evangelical: 'Évangélique', protestant: 'Protestante',
+  baptist: 'Baptiste', pentecostal: 'Pentecôtiste',
+  anglican: 'Anglicane', orthodox: 'Orthodoxe',
+  methodist: 'Méthodiste', lutheran: 'Luthérienne',
+  adventist: 'Adventiste', seventh_day_adventist: 'Adventiste du 7e jour',
+  apostolic: 'Apostolique', reformed: 'Réformée',
+  assemblies_of_god: 'Assemblée de Dieu', mennonite: 'Mennonite',
+  presbyterian: 'Presbytérienne', quaker: 'Quaker',
+}
+const denomLabel = (v?: string | null) => (v ? DENOM_LABELS[v] || v : '')
+
 function osmUrl(sourceRef?: string | null): string | null {
   if (!sourceRef) return null
   const [type, id] = sourceRef.split('/')
@@ -62,7 +76,7 @@ export function EgliseDetailPage({ church: ch }: Props) {
           </nav>
           <h1 class="page-title"><i class="fas fa-church mr-3"></i>{ch.name}</h1>
           <p class="page-subtitle">
-            {[ch.denomination, ch.district, ch.city, ch.region, ch.country].filter(Boolean).join(' · ')}
+            {[denomLabel(ch.denomination), ch.district, ch.city, ch.region, ch.country].filter(Boolean).join(' · ')}
           </p>
         </div>
       </section>
@@ -177,7 +191,7 @@ export function EgliseDetailPage({ church: ch }: Props) {
             <div class="detail-card">
               <h2 class="detail-title"><i class="fas fa-address-card mr-2"></i>Informations</h2>
               <dl class="detail-list">
-                {ch.denomination ? (<><dt>Confession</dt><dd>{ch.denomination}</dd></>) : null}
+                {ch.denomination ? (<><dt>Confession</dt><dd>{denomLabel(ch.denomination)}</dd></>) : null}
                 {ch.address ? (<><dt>Adresse</dt><dd>{ch.address}</dd></>) : null}
                 {[ch.district, ch.city, ch.region].filter(Boolean).length ? (
                   <><dt>Localité</dt><dd>{[ch.district, ch.city, ch.region].filter(Boolean).join(' · ')}</dd></>
@@ -199,6 +213,17 @@ export function EgliseDetailPage({ church: ch }: Props) {
                 </p>
               ) : null}
             </div>
+
+            {hasCoords ? (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${ch.latitude},${ch.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-route w-full"
+              >
+                <i class="fas fa-diamond-turn-right"></i>Itinéraire vers cette église
+              </a>
+            ) : null}
 
             <a href="/eglises" class="btn-ghost-sm w-full justify-center"><i class="fas fa-arrow-left mr-2"></i>Retour à l'annuaire</a>
           </aside>
