@@ -6,7 +6,7 @@
     const el = document.getElementById(id);
     if (!el) return;
     try {
-      const { data } = await axios.get(url, { params: { limit: 12 } });
+      const { data } = await axios.get(url, { params: { limit: 12 }, timeout: 15000 });
       el.innerHTML = data.items.length ? data.items.map(render).join('') : C.empty(emptyText);
     } catch (e) {
       console.error(e);

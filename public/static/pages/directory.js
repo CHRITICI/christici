@@ -21,7 +21,7 @@
   }
 
   async function load(page) {
-    grid.innerHTML = C.loading();
+    grid.innerHTML = C.skeletonCards(6);
     countEl.textContent = '';
     paginationEl.innerHTML = '';
 
@@ -32,7 +32,7 @@
     if (inputQ.value.trim()) params.q = inputQ.value.trim();
 
     try {
-      const { data } = await axios.get(apiBase, { params });
+      const { data } = await axios.get(apiBase, { params, timeout: 15000 });
       countEl.textContent = data.total ? `${data.total} résultat${data.total > 1 ? 's' : ''}` : '';
       grid.innerHTML = data.items.length
         ? data.items.map(renderCard).join('')
@@ -40,7 +40,10 @@
       C.pagination(paginationEl, data.page, data.pages, load);
     } catch (e) {
       console.error(e);
-      grid.innerHTML = C.error();
+      grid.innerHTML = C.error('Connexion lente ou interrompue — le chargement n\u2019a pas aboutit.') +
+        '<div style="grid-column:1/-1;text-align:center;margin-top:-1rem"><button id="btn-retry" class="btn-primary-sm"><i class="fas fa-rotate-right" style="margin-right:.5rem"></i>Réessayer</button></div>';
+      const retry = document.getElementById('btn-retry');
+      if (retry) retry.addEventListener('click', () => load(1));
     }
   }
 

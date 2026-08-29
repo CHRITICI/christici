@@ -10,9 +10,9 @@
   };
 
   async function load(type) {
-    grid.innerHTML = C.loading();
+    grid.innerHTML = C.skeletonCards(6);
     try {
-      const { data } = await axios.get('/api/media', { params: { type, limit: 24 } });
+      const { data } = await axios.get('/api/media', { params: { type, limit: 24 }, timeout: 15000 });
       grid.innerHTML = data.items.length
         ? data.items.map((m) => C.mediaCard(m)).join('')
         : C.empty(emptyTexts[type] || 'Aucun contenu pour le moment.');

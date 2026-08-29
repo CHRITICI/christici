@@ -75,6 +75,21 @@ export const renderer = jsxRenderer(
               <a href="/" class="flex-shrink-0" aria-label="Christici — Accueil">
                 <img src="/static/images/logo.png" alt="Christici" class="h-9 sm:h-11 w-auto" />
               </a>
+              {/* Recherche dans le header (desktop/tablette) — recherche au centre */}
+              <form action="/recherche" method="get" class="hidden md:flex items-center flex-1 max-w-xs lg:max-w-sm" role="search">
+                <div class="relative w-full">
+                  <input
+                    type="search"
+                    name="q"
+                    placeholder="Rechercher une église, une ville…"
+                    aria-label="Rechercher sur Christici"
+                    class="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-4 pr-10 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-200 hover:text-blue-700" aria-label="Lancer la recherche">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </form>
               <ul class="hidden lg:flex items-center gap-1 text-sm font-medium">
                 {NAV_ITEMS.map((item) => (
                   <li>
@@ -105,11 +120,25 @@ export const renderer = jsxRenderer(
             {/* Menu mobile */}
             <div id="nav-menu" class="hidden lg:hidden border-t border-slate-100 bg-white">
               <ul class="px-4 py-3 space-y-1 text-sm font-medium">
+                <li class="pb-2">
+                  <form action="/recherche" method="get" class="flex items-center gap-2" role="search">
+                    <input
+                      type="search"
+                      name="q"
+                      placeholder="Rechercher…"
+                      aria-label="Rechercher sur Christici"
+                      class="flex-1 min-w-0 rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <button type="submit" class="btn-primary-sm flex-shrink-0" aria-label="Lancer la recherche">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </form>
+                </li>
                 {NAV_ITEMS.map((item) => (
                   <li>
                     <a
                       href={item.href}
-                      class={`block px-4 py-2.5 rounded-lg ${isActive(currentPath, item.href) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                      class={`block px-4 py-3 rounded-lg ${isActive(currentPath, item.href) ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                       {item.label}
                     </a>
