@@ -6,7 +6,7 @@
   const results = document.getElementById('search-results');
 
   const SECTIONS = [
-    { key: 'churches', title: 'Églises', icon: 'fa-church', link: (r) => '/eglises' },
+    { key: 'churches', title: 'Églises', icon: 'fa-church', link: (r) => '/eglises/' + encodeURIComponent(r.slug) },
     { key: 'directory', title: 'Organisations & affaires', icon: 'fa-people-group', link: (r) => (r.kind === 'affaire' ? '/affaires' : '/organisations') },
     { key: 'profiles', title: 'Profils chrétiens', icon: 'fa-user-check', link: () => '/profils' },
     { key: 'events', title: 'Événements', icon: 'fa-calendar-days', link: () => '/infos' },
@@ -15,19 +15,19 @@
   ];
 
   function sub(r) {
-    return [r.category_name, r.denomination, r.title, r.city, r.event_type, r.excerpt]
+    return [r.category_name, C.denomLabel(r.denomination), r.title, r.city, r.event_type, r.excerpt]
       .filter(Boolean).map(C.escapeHtml).join(' · ');
   }
 
   async function run(q) {
     results.innerHTML = C.loading('Recherche en cours…');
     try {
-      const { data } = await axios.get('/api/search', { params: { q } });
+      const { data } = await axios.get('/api/search', { params: { q }, timeout: 15000 });
       if (!data.total) {
-        results.innerHTML = C.empty(`Aucun résultat pour « ${C.escapeHtml(q)} ». Essayez d\u2019autres mots-clés.`);
+        results.innerHTML = C.empty(`Aucun résultat pour « ${C.escapeHtml(q)} ». Essayez d’autres mots-clés, ou parcourez <a href="/eglises" class="text-blue-700 font-semibold underline underline-offset-2">l’annuaire des églises</a>.`);
         return;
       }
-      results.innerHTML = SECTIONS
+      results.innerHTML = `<p class="text-sm text-slate-500 mb-6" role="status">${data.total} résultat${data.total > 1 ? 's' : ''} pour « ${C.escapeHtml(q)} »</p>` + SECTIONS
         .filter((s) => data.results[s.key]?.length)
         .map((s) => `
           <section class="mb-8">
@@ -45,7 +45,10 @@
           </section>`).join('');
     } catch (e) {
       console.error(e);
-      results.innerHTML = C.error();
+      results.innerHTML = C.error('Connexion lente ou interrompue — la recherche n’a pas abouti.') +
+        '<div style="text-align:center;margin-top:1rem"><button id="btn-retry" class="btn-primary-sm"><i class="fas fa-rotate-right" style="margin-right:.5rem"></i>Réessayer</button></div>';
+      const retry = document.getElementById('btn-retry');
+      if (retry) retry.addEventListener('click', () => run(q));
     }
   }
 
